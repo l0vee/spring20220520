@@ -57,8 +57,9 @@ public class BoardController {
 		BoardDto dto = service.getBoardById(id);
 		List<ReplyDto> replyList = replyService.getReplyByBoardId(id);
 		model.addAttribute("board", dto);
-		model.addAttribute("replyList", replyList);
 		
+		//model.addAttribute("replyList", replyList);
+		//AJAX로 댓글 가져올 거니까 삭제하자.
 	}
 	
 	@PostMapping("modify")

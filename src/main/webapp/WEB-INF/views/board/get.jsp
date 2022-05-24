@@ -45,32 +45,211 @@
 
 		});
 
-		// reply-edit-toggle 버튼 클릭시 댓글 보여주는 div 숨기고,
-		// 수정 form 보여주기
-		$(".reply-edit-toggle-button").click(function() {
-			console.log("버튼클릭");
-			const replyId = $(this).attr("data-reply-id");
-			const displayDivId = "#replyDisplayContainer" + replyId;
-			const editFormId = "#replyEditFormContainer" + replyId;
+		
 
-			console.log(replyId);
-			console.log(displayDivId);
-			console.log(editFormId);
+		
+		
+		//페이지 로딩 후 reply list 가져오는 ajax 요청
+		//context path 바뀔 수 있으니까 approot 붙이기
+		const listReply = function(){
+		
+			const data = {boardId: ${board.id}};
+			$.ajax({
+				url:"${appRoot}/reply/list",
+				type:"get",
+				data: data,
+				success:function(list){
+					//console.log("댓글 가져 오기 성공");
+					console.log(list);
+					
+					//작성시에 안쪽 내용물 지워주기
+					const replyListElement = $("#replyList1");
+					replyListElement.empty();
+					
+					//댓글 개수 표시
+					$("#numOfReply1").text(list.length);
+					
+					//const 상수 선언
+					//댓글 리스트 보여주게 만드는 코드
+					
+					for(let i=0; i<list.length; i++){
+					const replyElement = $("<li class='list-group-item'/>");
+					replyElement.html(`
+							
+						
+							<div id="replyDisplayContainer\${list[i].id }">
+								<div class="fw-bold">
+									<i class="fa-solid fa-comment"></i>
+									<%--el코드가 아니라 자바스크립트로 인식하도록 역슬래쉬--%>
+									\${list[i].prettyInserted}
+									<span class="reply-edit-toggle-button badge bg-info text-dark"
+										id="replyEditToggleButton\${list[i].id }"
+										data-reply-id="\${list[i].id }">
+										<i class="fa-solid fa-pen-to-square"></i>
+									</span>
+									<span class="reply-delete-button badge bg-danger"
+										data-reply-id="\${list[i].id }">
+										<i class="fa-solid fa-trash-can"></i>
+									</span>
+								</div>
+								\${list[i].content}
+	
+	
+							</div>
+	
+							<div id="replyEditFormContainer\${list[i].id }"
+								style="display: none;">
+								<form action="${appRoot }/reply/modify" method="post">
+									<div class="input-group">
+										<input type="hidden" name="boardId" value="${board.id }" />
+										<input type="hidden" name="id" value="\${list[i].id }" />
+										<input class="form-control" value="\${list[i].content }"
+											type="text" name="content" required />
+										<button data-reply-id="\${list[i].id}"
+										class="reply-modify-submit btn btn-outline-secondary">
+											<i class="fa-solid fa-comment-dots"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+							
+							`);
+					replyListElement.append(replyElement);
+				
+					
+					//자바스크립트에서 스트링쓰는법 큰따옴표,작은따옴표,`(물결밑에)
+					//백틱 = ` string -> el쓰듯이 객체의 property를 그위에 바로 작성할 수 있다.
+					//el로 출력되지 않고 자바스크립트로 해석하고 싶으면 역슬래쉬\를 앞에 붙임, 제약이 적어서 따옴표보다 좋다.
+					
+					} //end of for
+					
+					$(".reply-modify-submit").click(function(e){
+						e.preventDefault();
+						
+						const id = $(this).attr("data-reply-id");
+						const formElem = $("#replyEditFormContainer" + id).find("form");
+						//const data = formElem.serialize(); //put 방식은 controller에서 못받음
+						const data = {
+								boardId : formElem.find("[name=boardId]").val(),
+								id: formElem.find("[name=id]").val(),
+								content : formElem.find("[name=content]").val()
+						};
+						
+						$.ajax({
+							url : "${appRoot}/reply/modify",
+							type : "put",
+							data : JSON.stringify(data),
+							contentType : "application/json",
+							success : function(data){
+								console.log("수정 성공");
+								
+								//메시지 보여주기
+								$("#replyMessage1").show().text(data).fadeOut(3000);
+								//댓글 refresh
+								listReply();
+								
+								},
+								error : function(){
+									console.log("수정 실패");
+								},
+								complete : function(){
+									console.log("수정 종료");
+								}
+						});
+					});
+					
+					// reply-edit-toggle 버튼 클릭시 댓글 보여주는 div 숨기고,
+					// 수정 form 보여주기
+					$(".reply-edit-toggle-button").click(function() {
+						console.log("버튼클릭");
+						const replyId = $(this).attr("data-reply-id");
+						const displayDivId = "#replyDisplayContainer" + replyId;
+						const editFormId = "#replyEditFormContainer" + replyId;
 
-			$(displayDivId).hide();
-			$(editFormId).show();
+						console.log(replyId);
+						console.log(displayDivId);
+						console.log(editFormId);
+
+						$(displayDivId).hide();
+						$(editFormId).show();
+					});
+					
+					
+					//삭제 버튼 클릭 이벤트 메소드 등록
+					// reply-delete-button 클릭시
+					$(".reply-delete-button").click(function() {
+						const replyId = $(this).attr("data-reply-id");
+						const message = "댓글을 삭제하시겠습니까?";
+
+						if (confirm(message)) {
+							//$("#replyDeleteInput1").val(replyId);
+							//$("#replyDeleteForm1").submit();
+							
+							$.ajax({
+								url:"${appRoot}/reply/delete/" +  replyId,
+								type: "delete",
+								success : function(data){
+									//console.log(replyId + "댓글 삭제됨");
+									//댓글 list refresh
+									listReply();
+									//메세지 출력
+									$("#replyMessage1").show().text(data).fadeOut(3000);
+									},
+									
+									error : function() {
+										console.log(replyId + "댓글 삭제 중 문제 발생됨");	
+									},
+									
+									complete: function() {
+										console.log(replyId + "댓글 삭제 요청 끝");	
+									}
+							});
+						}
+					});	
+					
+				},
+				error : function(){
+					console.log("댓글 가져오기 실패");
+				}
+			});
+			
+		}
+					
+		
+		
+		//댓글 가져오는 함수 실행 
+		listReply();
+		
+		// addReplySubmitButton1 버튼 클릭시 ajax 댓글 추가 요청
+		$("#addReplySubmitButton1").click(function (e) {
+			e.preventDefault();
+			
+			const data = $("#insertReplyForm1").serialize();
+			
+			$.ajax({
+				url : "${appRoot }/reply/insert",
+				type : "post",
+				data : data,
+				success : function(data) {
+					//새 댓글 등록되었다는 메시지 출력
+					$("#replyMessage1").show().text(data).fadeOut(3000);
+					
+					//text input 초기화
+					$("#insertReplyContentInput1").val("");
+					//모든 댓글 가져오는 ajax 요청
+					//댓글 가져오는 함수 실행 (새 댓글 등록하고 나서도)
+					listReply();
+					//console.log(data);
+				},
+				error : function() {
+					console.log("문제 발생");
+				},
+				complete : function() {
+					console.log("요청 완료");
+				}
+			});
 		});
-
-		// reply-delete-button 클릭시
-		$(".reply-delete-button").click(function() {
-			const replyId = $(this).attr("data-reply-id");
-			const message = "댓글을 삭제하시겠습니까?";
-
-			if (confirm(message)) {
-				$("#replyDeleteInput1").val(replyId);
-				$("#replyDeleteForm1").submit();
-			}
-		});
+		
 	});
 </script>
 
@@ -120,6 +299,7 @@
 
 			</div>
 		</div>
+		
 	</div>
 
 
@@ -128,17 +308,22 @@
 	<div class="container mt-3">
 		<div class="row">
 			<div class="col">
-				<form action="${appRoot }/reply/insert" method="post">
+				<form id="insertReplyForm1">
 					<div class="input-group">
 						<input type="hidden" name="boardId" value="${board.id }" />
-						<input class="form-control" type="text" name="content" required />
-						<button class="btn btn-outline-secondary">
+						<input id="insertReplyContentInput1" class="form-control" type="text" name="content" required />
+						<button id="addReplySubmitButton1" class="btn btn-outline-secondary">
 							<i class="fa-solid fa-comment-dots"></i>
 						</button>
 					</div>
 				</form>
 			</div>
 		</div>
+		<div class="row">
+			<!-- .alert.alert-primary#replyMessage1 -->
+			<div class="alert alert-primary" style="display:none;" id="replyMessage1"></div>
+		</div>
+		
 	</div>
 
 	<%-- 댓글 목록 --%>
@@ -147,10 +332,12 @@
 	<div class="container mt-3">
 		<div class="row">
 			<div class="col">
-				<h3>댓글 ${board.numOfReply } 개</h3>
+				<h3>댓글 <span id="numOfReply1"></span> 개</h3>
 
-				<ul class="list-group">
-					<c:forEach items="${replyList }" var="reply">
+				<ul id= "replyList1" class="list-group">
+				
+				<%--
+				<c:forEach items="${replyList }" var="reply">
 						<li class="list-group-item">
 							<div id="replyDisplayContainer${reply.id }">
 								<div class="fw-bold">
@@ -189,6 +376,8 @@
 
 						</li>
 					</c:forEach>
+				 --%>
+					
 				</ul>
 			</div>
 		</div>
