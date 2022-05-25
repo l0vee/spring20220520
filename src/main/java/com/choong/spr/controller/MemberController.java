@@ -1,12 +1,16 @@
 package com.choong.spr.controller;
 
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.choong.spr.domain.MemberDto;
 import com.choong.spr.service.MemberService;
@@ -30,13 +34,16 @@ public class MemberController {
 	}
 	
 	@PostMapping("signup")
-	public void signupProcess(MemberDto member) {
+	public String signupProcess(MemberDto member, RedirectAttributes rttr) {
 		boolean success = service.addMember(member);
 		
 		if(success) {
-			
+			rttr.addFlashAttribute("message", "회원가입이 완료되었습니다.");
+			return "redirect:/board/list";
 		} else {
-			
+			rttr.addFlashAttribute("message", "회원가입이 실패되었습니다.");
+			rttr.addFlashAttribute("member", member);
+			return "redirect:/member/signup";
 		}
 		
 	}
@@ -77,7 +84,7 @@ public class MemberController {
 	@ResponseBody //view로 해석될 필요 없으므로
 	public String nickNameCheck(String nickName) {
 		//버튼, 메시지 출력, 서비스메소드, mappermethod,
-		boolean exist = service.hasMembernickName(nickName);
+		boolean exist = service.hasMemberNickName(nickName);
 		
 		if (exist) {
 			return "notOk";
@@ -88,4 +95,22 @@ public class MemberController {
 		}
 		
 	}
+	
+	@GetMapping("list")
+	public void list(Model model) {
+		List<MemberDto> list = service.listMember();
+		model.addAttribute("memberList",list);
+	}
+	
+	//jsp (id, password, email, nickName, inserted) table로 보여주세요.
+	//service, mapper 작성 ORDER BY inserted DESC (나중에 가입한 사람이 위로)
+
+@GetMapping("get")
+public void getMember(String id, Model model) {
+	MemberDto member = service.getMemberById(id);
+	
+	model.addAttribute("member",member);
+}
+
+
 }
