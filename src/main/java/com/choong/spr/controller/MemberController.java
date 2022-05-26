@@ -93,6 +93,8 @@ public class MemberController {
 		}
 
 	}
+	
+
 
 	@GetMapping("list")
 	public void list(Model model) {
@@ -123,5 +125,25 @@ public class MemberController {
 		}
 
 	}
+	
+	@PostMapping("modify")
+	public String modifyMember(MemberDto dto, String oldPassword, RedirectAttributes rttr) {
+		//model은 forward할때 request1번, redirect는 request2번일어날때
+		//2번이라 query string을 붙여서 넘어감
+		//request보다 넓은 영역인 session에 붙이면 되는데 권장되지 않아서
+		
+		boolean success = service.modifyMember(dto, oldPassword);
+		
+		if (success) {
+			rttr.addFlashAttribute("message","회원 정보가 수정되었습니다.");
+		} else {
+			rttr.addFlashAttribute("message","회원 정보가 수정되지 않았습니다.");
+		}
+		
+		rttr.addFlashAttribute("member", dto); // 객체를 model처럼 object (m
+		rttr.addAttribute("id",dto.getId()); // 객체를 query string으로 받아서 id =tweety
+		return "redirect:/member/get";
+	
 
+}
 }
