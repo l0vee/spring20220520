@@ -2,6 +2,9 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="my" tagdir="/WEB-INF/tags"%>
+<%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -263,9 +266,25 @@
 			<div class="col">
 				<h1>
 					글 본문
-					<button id="edit-button1" class="btn btn-secondary">
-						<i class="fa-solid fa-pen-to-square"></i>
-					</button>
+
+					<sec:authorize access="isAuthenticated()">
+						<sec:authentication property="principal" var="principal" />
+						<!-- 이제 그럼 el에서 쓸 수 있다-->
+						<%--
+					${principal.username}
+					${board.memberId}
+					 --%>
+						<c:if test="${principal.username == board.memberId }">
+
+							<button id="edit-button1" class="btn btn-secondary">
+								<i class="fa-solid fa-pen-to-square"></i>
+							</button>
+
+						</c:if>
+					</sec:authorize>
+
+
+
 				</h1>
 
 				<c:if test="${not empty message }">
@@ -276,10 +295,11 @@
 					<input type="hidden" name="id" value="${board.id }" />
 
 					<div>
-						<label class="form-label" for="input1">제목</label>
-						<input class="form-control" type="text" name="title" required
+						<label class="form-label" for="input1">제목</label> <input
+							class="form-control" type="text" name="title" required
 							id="input1" value="${board.title }" readonly />
 					</div>
+
 
 					<div>
 						<label class="form-label" for="textarea1">본문</label>
@@ -288,8 +308,14 @@
 					</div>
 
 					<div>
-						<label for="input2" class="form-label">작성일시</label>
-						<input class="form-control" type="datetime-local"
+						<label for="input3" class="form-label">작성자</label> <input
+							class="form-control" type="text" value="${board.writerNickName }"
+							readonly />
+					</div>
+
+					<div>
+						<label for="input2" class="form-label">작성일시</label> <input
+							class="form-control" type="datetime-local"
 							value="${board.inserted }" readonly />
 					</div>
 
@@ -299,7 +325,7 @@
 
 			</div>
 		</div>
-		
+
 	</div>
 
 
@@ -310,9 +336,11 @@
 			<div class="col">
 				<form id="insertReplyForm1">
 					<div class="input-group">
-						<input type="hidden" name="boardId" value="${board.id }" />
-						<input id="insertReplyContentInput1" class="form-control" type="text" name="content" required />
-						<button id="addReplySubmitButton1" class="btn btn-outline-secondary">
+						<input type="hidden" name="boardId" value="${board.id }" /> <input
+							id="insertReplyContentInput1" class="form-control" type="text"
+							name="content" required />
+						<button id="addReplySubmitButton1"
+							class="btn btn-outline-secondary">
 							<i class="fa-solid fa-comment-dots"></i>
 						</button>
 					</div>
@@ -321,9 +349,10 @@
 		</div>
 		<div class="row">
 			<!-- .alert.alert-primary#replyMessage1 -->
-			<div class="alert alert-primary" style="display:none;" id="replyMessage1"></div>
+			<div class="alert alert-primary" style="display: none;"
+				id="replyMessage1"></div>
 		</div>
-		
+
 	</div>
 
 	<%-- 댓글 목록 --%>
@@ -332,11 +361,13 @@
 	<div class="container mt-3">
 		<div class="row">
 			<div class="col">
-				<h3>댓글 <span id="numOfReply1"></span> 개</h3>
+				<h3>
+					댓글 <span id="numOfReply1"></span> 개
+				</h3>
 
-				<ul id= "replyList1" class="list-group">
-				
-				<%--
+				<ul id="replyList1" class="list-group">
+
+					<%--
 				<c:forEach items="${replyList }" var="reply">
 						<li class="list-group-item">
 							<div id="replyDisplayContainer${reply.id }">
@@ -377,7 +408,7 @@
 						</li>
 					</c:forEach>
 				 --%>
-					
+
 				</ul>
 			</div>
 		</div>
@@ -387,8 +418,8 @@
 	<div class="d-none">
 		<form id="replyDeleteForm1" action="${appRoot }/reply/delete"
 			method="post">
-			<input id="replyDeleteInput1" type="text" name="id" />
-			<input type="text" name="boardId" value="${board.id }" />
+			<input id="replyDeleteInput1" type="text" name="id" /> <input
+				type="text" name="boardId" value="${board.id }" />
 		</form>
 	</div>
 </body>

@@ -146,4 +146,10 @@ public class MemberController {
 	
 
 }
+	@GetMapping("login")
+	public void loginPage() {
+		
+	}
+	
+	
 }

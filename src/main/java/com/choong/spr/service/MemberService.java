@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.choong.spr.domain.MemberDto;
 import com.choong.spr.mapper.MemberMapper;
@@ -21,14 +22,25 @@ public class MemberService {
 	private BCryptPasswordEncoder passwordEncoder;
 
 	public boolean addMember(MemberDto member) {
+		
 		//평문암호를 암호화(encoding)
 		String encodedPassword = passwordEncoder.encode(member.getPassword());
+		
 		//암호화된 암호를 다시 세팅
 		member.setPassword(encodedPassword);
+	
+		//insert member
+		int cnt1 = mapper.insertMember(member);
 		
-		return mapper.insertMember(member) == 1;
-		//하나가 잘 들어가면 1  return
+	
+		//insert auth
+		int cnt2 = mapper.insertAuth(member.getId(), "ROLE_USER");
+		
+		return cnt1 == 1 && cnt2 == 1;
+		
 	}
+
+
 
 	public boolean hasMemberId(String id) {
 		return mapper.countMemberId(id) > 0;
@@ -51,6 +63,7 @@ public class MemberService {
 		return mapper.selectMemberById(id);
 	}
 
+	@Transactional
 	public boolean removeMember(MemberDto dto) {
 		MemberDto member = mapper.selectMemberById(dto.getId());
 		
@@ -58,10 +71,18 @@ public class MemberService {
 		String encodedPW = member.getPassword();
 		
 		if (passwordEncoder.matches(rawPW, encodedPW)) {
-			return mapper.deleteMemberById(dto.getId()) == 1;
+			int cnt1= mapper.deleteAuth(member.getId(), "ROLE_USER");
+			int cnt2 = mapper.deleteMemberById(dto.getId());
+			
+			//순서 중요! 1,2 바뀌면 foreign key 위배됨
+			return cnt2 == 1;
+			//권한이 2개 이상 있을수도 있으니까 cnt1은 안쓴다.
+			
 		}
 		
 		return false;
+		
+		
 	}
 
 	public boolean modifyMember(MemberDto dto, String oldPassword) {
