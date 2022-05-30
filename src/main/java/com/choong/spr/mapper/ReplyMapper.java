@@ -14,13 +14,12 @@ public interface ReplyMapper {
 
 	int updateReply(ReplyDto dto);
 
-
 	void deleteByBoardId(int boardId);
 
 	ReplyDto selectReplyById(int id);
 
 	int deleteReply(int id);
 
-	void deleteByMemberId(String memberId); //개수 몇개일지 모름 0개지워질수도 있으니 int말고
+	void deleteByMemberId(String memberId); //개수 몇개일지 모름 0개 지워질수도 있으니 int말고
 
 }

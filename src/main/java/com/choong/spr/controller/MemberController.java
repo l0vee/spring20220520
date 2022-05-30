@@ -123,6 +123,9 @@ public class MemberController {
 		} else {
 			rttr.addAttribute("id", dto.getId());
 			return "redirect:/member/get";
+			
+			
+			
 		}
 
 	}
