@@ -153,6 +153,7 @@
 								
 								},
 								error : function(){
+									$("#replyMessage1").show().text("댓글을 수정할 수 없습니다.").fadeOut(3000);
 									console.log("수정 실패");
 								},
 								complete : function(){
@@ -200,6 +201,7 @@
 									},
 									
 									error : function() {
+										$("#replyMessage1").show().text("댓글을 삭제할 수 없습니다.").fadeOut(3000);
 										console.log(replyId + "댓글 삭제 중 문제 발생됨");	
 									},
 									
@@ -245,6 +247,7 @@
 					//console.log(data);
 				},
 				error : function() {
+					$("#replyMessage1").show().text("댓글을 작성할 수 없습니다.").fadeOut(3000);
 					console.log("문제 발생");
 				},
 				complete : function() {
