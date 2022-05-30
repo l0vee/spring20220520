@@ -1,5 +1,6 @@
 package com.choong.spr.controller;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,7 +114,7 @@ public class MemberController {
 	}
 
 	@PostMapping("remove")
-	public String removeMember(MemberDto dto, RedirectAttributes rttr) {
+	public String removeMember(MemberDto dto, Principal principal, RedirectAttributes rttr) {
 		boolean success = service.removeMember(dto);
 
 		if (success) {

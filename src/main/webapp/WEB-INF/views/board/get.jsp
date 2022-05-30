@@ -85,17 +85,18 @@
 									<i class="fa-solid fa-comment"></i>
 									<%--el코드가 아니라 자바스크립트로 인식하도록 역슬래쉬--%>
 									\${list[i].prettyInserted}
-									<span class="reply-edit-toggle-button badge bg-info text-dark"
-										id="replyEditToggleButton\${list[i].id }"
-										data-reply-id="\${list[i].id }">
-										<i class="fa-solid fa-pen-to-square"></i>
+									
+									
+									<span id="modifyButtonWrapper\${list[i].id }">
 									</span>
-									<span class="reply-delete-button badge bg-danger"
-										data-reply-id="\${list[i].id }">
-										<i class="fa-solid fa-trash-can"></i>
-									</span>
+									
 								</div>
-								\${list[i].content}
+								
+								<span class="badge bg-light text-dark">
+								<i class="fa-solid fa-user"></i>
+								\${list[i].writerNickName}
+								</span>
+								<span id="replyContent\${list[i].id}"></span>
 	
 	
 							</div>
@@ -118,6 +119,22 @@
 							
 							`);
 					replyListElement.append(replyElement);
+					$("#replyContent"+ list[i].id).text(list[i].content);
+					
+					//own이 true일 때만 수정, 삭제 버튼 보이기
+					if(list[i].own){
+						$("#modifyButtonWrapper" + list[i].id).html(`
+								<span class="reply-edit-toggle-button badge bg-info text-dark"
+								id="replyEditToggleButton\${list[i].id }"
+								data-reply-id="\${list[i].id }">
+								<i class="fa-solid fa-pen-to-square"></i>
+							</span>
+							<span class="reply-delete-button badge bg-danger"
+								data-reply-id="\${list[i].id }">
+								<i class="fa-solid fa-trash-can"></i>
+							</span>
+						`);
+					}
 				
 					
 					//자바스크립트에서 스트링쓰는법 큰따옴표,작은따옴표,`(물결밑에)

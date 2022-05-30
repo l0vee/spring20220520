@@ -11,6 +11,8 @@ public class ReplyDto {
 	private String content;
 	private LocalDateTime inserted;
 	private String memberId;
+	private boolean own;
+	private String writerNickName;
 
 	public String getPrettyInserted() {
 		// 24시간 이내면 시간만

@@ -7,8 +7,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.choong.spr.domain.BoardDto;
 import com.choong.spr.domain.MemberDto;
+import com.choong.spr.mapper.BoardMapper;
 import com.choong.spr.mapper.MemberMapper;
+import com.choong.spr.mapper.ReplyMapper;
 
 @Service
 //spring bean으로 만들어주는 annotation
@@ -17,6 +20,12 @@ public class MemberService {
 	@Autowired
 	private MemberMapper mapper;
 	//mapper에게 의존하는 service
+	
+	@Autowired
+	private ReplyMapper replyMapper;
+	
+	@Autowired
+	private BoardMapper boardMapper;
 	
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
@@ -71,11 +80,26 @@ public class MemberService {
 		String encodedPW = member.getPassword();
 		
 		if (passwordEncoder.matches(rawPW, encodedPW)) {
-			int cnt1= mapper.deleteAuth(member.getId(), "ROLE_USER");
-			int cnt2 = mapper.deleteMemberById(dto.getId());
+			//댓글 삭제
+			replyMapper.deleteByMemberId(dto.getId());
+			
+			//이 멤버가 쓴 게시글에 달린 다른 사람 댓글 삭제
+			List<BoardDto> boardList = boardMapper.listByMemberId(dto.getId());
+			for (BoardDto board : boardList) {
+				replyMapper.deleteByBoardId(board.getId());
+			}
+
+			//이 멤버가 쓴 게시글 삭제
+			boardMapper.deleteByMemberId(dto.getId());
+			
+			//권한테이블 삭제
+			mapper.deleteAuth(member.getId(), "ROLE_USER");
+			
+			//멤버테이블 삭제
+			int cnt = mapper.deleteMemberById(dto.getId());
 			
 			//순서 중요! 1,2 바뀌면 foreign key 위배됨
-			return cnt2 == 1;
+			return cnt == 1;
 			//권한이 2개 이상 있을수도 있으니까 cnt1은 안쓴다.
 			
 		}

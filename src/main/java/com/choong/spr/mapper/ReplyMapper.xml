@@ -11,13 +11,15 @@
 
 	<select id="selectAllBoardId"
 		resultType="com.choong.spr.domain.ReplyDto">
-		SELECT id,
-		board_id boardId,
-		content,
-		inserted
-		FROM Reply
-		WHERE board_id = #{boardId}
-		ORDER BY id
+		SELECT r.id,
+				r.board_id boardId,
+				r.content,
+				m.nickName writerNickName,
+				r.inserted,
+				IF (m.id= #{memberId}, 1 ,0) own
+		FROM Reply r JOIN Member m ON r.memberId = m.id
+		WHERE r.board_id = #{boardId}
+		ORDER BY r.id
 	</select>
 
 	<update id="updateReply">
@@ -48,5 +50,10 @@
 
 
 	</select>
+	
+	<delete id="deleteByMemberId">
+	DELETE FROM Reply
+	WHERE memberId = #{memberId}
+	</delete>
 
 </mapper>

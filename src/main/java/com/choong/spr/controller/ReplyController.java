@@ -88,8 +88,12 @@ public class ReplyController {
 	}
 
 	@GetMapping("list")
-	public List<ReplyDto> list(int boardId) {
+	public List<ReplyDto> list(int boardId, Principal principal) {
+		if (principal == null) {
 		return service.getReplyByBoardId(boardId);
+	} else {
+		return service.getReplyWithOwnByBoardId(boardId, principal.getName());
 	}
 
+}
 }
