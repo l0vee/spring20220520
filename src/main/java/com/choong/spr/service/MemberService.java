@@ -129,4 +129,13 @@ public class MemberService {
 	}
 
 
+	public void initPassword(String id) {
+		
+		String pw = passwordEncoder.encode(id);
+		
+		mapper.updatePasswordById(id, pw);
+		
+	}
+
+
 }

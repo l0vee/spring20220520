@@ -9,6 +9,16 @@
 <c:url value ="/member/list" var="memberListUrl"></c:url>
 <c:url value ="/member/login" var="loginUrl"></c:url>
 <c:url value ="/logout" var="logoutUrl"></c:url>
+<c:url value ="/member/initpw" var="initPasswordUrl"></c:url>
+
+<%-- 회원정보링크 --%>
+<sec:authorize access="isAuthenticated()">
+<sec:authentication property="principal" var="principal"/>
+<c:url value="/member/get" var="memberInfoUrl">
+<c:param name="id" value="${principal.username }" />
+</c:url>
+</sec:authorize>
+
 <nav class="navbar navbar-expand-md navbar-light bg-light mb-3">
   <div class="container">
     <a class="navbar-brand" href="${listUrl }"><i class="fa-solid fa-house"></i></a>
@@ -38,10 +48,23 @@
         <a href="${signupUrl}" class="nav-link ${current == 'signup' ? 'active' : '' }">회원가입</a>
         </li>
         
+        <sec:authorize access="isAuthenticated()">
+        <li class="nav-item">
+        <a href="${memberInfoUrl }" class="nav-link" ${current == 'memberInfo' ? 'active' : '' }">회원정보</a>
+        </li>
+        
+        
+        </sec:authorize>
+        
         <sec:authorize access="hasRole('ADMIN')">
         <li class="nav-item">
-        <a href="${memberListUrl}" class="nav-link ${current == 'memberList' ? 'active' : '' }">회원목록</a>
+        <a href="${memberListUrl }" class="nav-link ${current == 'memberList' ? 'active' : '' }">회원목록</a>
         </li>
+        
+        <!--  .nav-item>a.nav-link{암호초기화} -->
+         <div class="nav-item">
+         <a href="${initPasswordUrl }" class="nav-link">암호초기화</a>
+         </div>
         </sec:authorize>
         
       <sec:authorize access="not isAuthenticated()">
