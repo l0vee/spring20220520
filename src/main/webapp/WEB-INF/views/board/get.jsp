@@ -327,14 +327,20 @@
 							cols="30" rows="10" readonly>${board.body }</textarea>
 					</div>
 					
-					<div>
-					<img src="file:///C:/imgtmp/board/${board.id }/${board.fileName }" alt=""/>
-					</div>
+					
+					<c:forEach items="${board.fileName }" var="file"> <!--items 리스트에/ var 하나씩 -->
+						<c:url value="${file }" var="fileLink" />
+						<div>
+							<img src="${imageUrl }/board/${board.id }/${fileLink }" alt=""/>
+						</div>
+					
+				
+					</c:forEach>
 					
 
 					<div>
-						<label for="input3" class="form-label">작성자</label> <input
-							class="form-control" type="text" value="${board.writerNickName }"
+						<label for="input3" class="form-label">작성자</label>
+						<input class="form-control" type="text" value="${board.writerNickName }"
 							readonly />
 					</div>
 

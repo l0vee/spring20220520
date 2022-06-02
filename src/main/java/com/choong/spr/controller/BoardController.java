@@ -1,6 +1,7 @@
 package com.choong.spr.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class BoardController {
 	
 	@PostMapping("insert")
 	public String insert(BoardDto board,
-						MultipartFile file,
+						MultipartFile[] file, //여러개일수 있으므로 배열로 받음
 						Principal principal,
 						RedirectAttributes rttr) {
 		
@@ -56,8 +57,16 @@ public class BoardController {
 //		System.out.println(file.getOriginalFilename());
 //		System.out.println(file.getSize());
 		
-		if(file.getSize()>0) {
-			board.setFileName(file.getOriginalFilename());
+//		if(file.getSize()>0) {
+//			board.setFileName(file.getOriginalFilename());
+//		} 1개의 파일만 올리는 코드
+		
+		if (file != null) {
+			List<String> fileList = new ArrayList<String>();
+			for (MultipartFile f : file) {
+				fileList.add(f.getOriginalFilename());
+			}
+			board.setFileName(fileList);
 		}
 		
 		board.setMemberId(principal.getName());
