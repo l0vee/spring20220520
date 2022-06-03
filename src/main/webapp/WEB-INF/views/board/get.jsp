@@ -1,3 +1,4 @@
+<%@page import="java.net.URLEncoder"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
@@ -33,6 +34,8 @@
 			$("#textarea1").removeAttr("readonly");
 			$("#modify-submit1").removeClass("d-none");
 			$("#delete-submit1").removeClass("d-none");
+			$("#addFileInputContainer1").removeClass("d-none");
+			$(".removeFileCheckBox").removeClass("d-none");
 		});
 
 		$("#delete-submit1").click(function(e) {
@@ -311,7 +314,8 @@
 					<div class="alert alert-primary">${message }</div>
 				</c:if>
 
-				<form id="form1" action="${appRoot }/board/modify" method="post">
+				<form id="form1" action="${appRoot }/board/modify" method="post"
+					enctype="multipart/form-data">
 					<input type="hidden" name="id" value="${board.id }" />
 
 					<div>
@@ -326,21 +330,51 @@
 						<textarea class="form-control" name="body" id="textarea1"
 							cols="30" rows="10" readonly>${board.body }</textarea>
 					</div>
-					
-					
-					<c:forEach items="${board.fileName }" var="file"> <!--items 리스트에/ var 하나씩 -->
-						<c:url value="${file }" var="fileLink" />
-						<div>
-							<img src="${imageUrl }/board/${board.id }/${fileLink }" alt=""/>
+
+
+					<c:forEach items="${board.fileName }" var="file">
+						<!--items 리스트에/ var 하나씩 -->
+						<%
+							String file = (String) pageContext.getAttribute("file");
+						String encodedFileName = URLEncoder.encode(file, "utf-8");
+						pageContext.setAttribute("encodedFileName", encodedFileName);
+						%>
+
+
+						<div class="row">
+							<div class="col-1">
+							<div class="d-none removeFileCheckBox">
+							삭제 <br/>
+							<input type="checkbox" name="removeFileList" value="${file }"/>
+							</div>
+							</div>
+							<div class="col-11">
+
+								<div>
+									<img class="img-fluid" src="${imageUrl }/board/${board.id }/${encodedFileName }"
+										alt="" />
+								</div>
+							</div>
 						</div>
-					
-				
+
+
+
+
+
 					</c:forEach>
-					
+
+
+					<div id="addFileInputContainer1" class="d-none">
+						<!-- 처음엔 안 보이게 -->
+						파일 추가 :
+						<input type="file" accept="image/*" multiple="multiple" name="addFileList" />
+
+					</div>
+
 
 					<div>
-						<label for="input3" class="form-label">작성자</label>
-						<input class="form-control" type="text" value="${board.writerNickName }"
+						<label for="input3" class="form-label">작성자</label> <input
+							class="form-control" type="text" value="${board.writerNickName }"
 							readonly />
 					</div>
 
